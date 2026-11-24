@@ -280,8 +280,36 @@ def lazybuffer_binary_e(self: 'LazyBuffer', op: 'BinaryOps', other: 'LazyBuffer'
     # Return a new LazyBuffer wrapping the fresh data array
     return LazyBuffer(res.astype(np.float32))
 
-# Step 9 - lazybuffer_r (not yet solved)
-# TODO: implement
+# Step 9 - lazybuffer_r
+import numpy as np
+
+def r(self: 'LazyBuffer', op: 'ReduceOps', axis=None) -> 'LazyBuffer':
+    """
+    Perform a reduction operation (SUM or MAX) along a given axis or axes,
+    keeping the collapsed dimensions as size 1 to preserve tensor rank.
+
+    Args:
+        self: The source LazyBuffer instance.
+        op: A member of the ReduceOps enum (SUM or MAX).
+        axis: An int, a tuple of ints, or None to reduce over the entire buffer.
+
+    Returns:
+        LazyBuffer: A new buffer instance containing the reduced float32 data.
+    """
+    x = self._np
+    
+    if op.name == 'SUM':
+        res = np.sum(x, axis=axis, keepdims=True)
+    elif op.name == 'MAX':
+        res = np.max(x, axis=axis, keepdims=True)
+    else:
+        raise ValueError(f"Unsupported Reduce operation: {op}")
+        
+    # Return a new LazyBuffer wrapping the fresh data array forced to float32
+    return LazyBuffer(res.astype(np.float32))
+
+# Dynamically bind the standalone utility onto the LazyBuffer class if needed
+LazyBuffer.r = r
 
 # Step 10 - lazybuffer_reshape (not yet solved)
 # TODO: implement
