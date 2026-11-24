@@ -240,8 +240,45 @@ def e(self, op: 'UnaryOps') -> 'LazyBuffer':
 # Bind the standalone function as an instance method onto the LazyBuffer class
 LazyBuffer.e = e
 
-# Step 8 - lazybuffer_binary_e (not yet solved)
-# TODO: implement
+# Step 8 - lazybuffer_binary_e
+import numpy as np
+
+def lazybuffer_binary_e(self: 'LazyBuffer', op: 'BinaryOps', other: 'LazyBuffer') -> 'LazyBuffer':
+    """
+    Apply a two-operand elementwise operation between two LazyBuffer instances
+    and return a brand new evaluated LazyBuffer without mutating inputs.
+
+    Args:
+        self: The first operand LazyBuffer
+        op: A member of BinaryOps enum (ADD, SUB, MUL, DIV, CMPLT, MAX)
+        other: The second operand LazyBuffer
+
+    Returns:
+        LazyBuffer: A new buffer instance containing the float32 result.
+    """
+    # Extract raw arrays from both source buffers
+    x = self._np
+    y = other._np
+    
+    if op.name == 'ADD':
+        res = x + y
+    elif op.name == 'SUB':
+        res = x - y
+    elif op.name == 'MUL':
+        res = x * y
+    elif op.name == 'DIV':
+        res = x / y
+    elif op.name == 'CMPLT':
+        # Less-than comparison: convert boolean array to numerical 1.0 or 0.0 mask
+        res = (x < y).astype(np.float32)
+    elif op.name == 'MAX':
+        # Element-wise maximum
+        res = np.maximum(x, y)
+    else:
+        raise ValueError(f"Unsupported Binary operation: {op}")
+        
+    # Return a new LazyBuffer wrapping the fresh data array
+    return LazyBuffer(res.astype(np.float32))
 
 # Step 9 - lazybuffer_r (not yet solved)
 # TODO: implement
