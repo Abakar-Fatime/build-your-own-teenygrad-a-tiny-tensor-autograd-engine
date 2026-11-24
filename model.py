@@ -152,8 +152,46 @@ if __name__ == "__main__":
     print(ones_buf.dtype)          # Outputs: dtype('float32')
     print(ones_buf._np.tolist())   # Outputs: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
 
-# Step 6 - rand (not yet solved)
-# TODO: implement
+# Step 6 - rand
+import numpy as np
+
+def rand(shape, seed=None):
+    """
+    Produce a LazyBuffer filled with uniformly distributed random float32 values 
+    in the half-open interval [0.0, 1.0) with the requested shape.
+
+    Args:
+        shape: A tuple or list of integers representing the target tensor dimensions.
+        seed: An optional integer to seed the random number generator for reproducibility.
+
+    Returns:
+        LazyBuffer: A new buffer instance containing the randomized float32 array.
+    """
+    # Initialize a localized random generator instance (reproducible if seed is provided)
+    rng = np.random.default_rng(seed)
+    
+    # Generate uniform values and explicitly cast the buffer to float32
+    random_array = rng.random(size=shape).astype(np.float32)
+    
+    return LazyBuffer(random_array)
+
+# Example verification matching your framework specifications:
+if __name__ == "__main__":
+    # Test reproducibility
+    b1 = rand((2, 2), seed=42)
+    b2 = rand((2, 2), seed=42)
+    b3 = rand((2, 2), seed=100)
+    
+    print(b1.shape)  # Outputs: (2, 2)
+    print(b1.dtype)  # Outputs: dtype('float32')
+    
+    # Check that matching seeds produce identical arrays
+    print(np.array_equal(b1._np, b2._np))  # Outputs: True
+    # Check that different seeds produce distinct arrays
+    print(np.array_equal(b1._np, b3._np))  # Outputs: False
+    
+    # Confirm boundaries [0, 1)
+    print(bool((b1._np >= 0).all() and (b1._np < 1).all()))  # Outputs: True
 
 # Step 7 - lazybuffer_unary_e (not yet solved)
 # TODO: implement
