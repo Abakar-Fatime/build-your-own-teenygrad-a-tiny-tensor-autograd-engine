@@ -52,8 +52,49 @@ if __name__ == "__main__":
     print(argsort([3, 1, 2]))   # Outputs: [1, 2, 0] -> values[1]=1, values[2]=2, values[0]=3
     print(argsort([10, 10, 5])) # Outputs: [2, 0, 1] -> stable sort preserves index 0 before index 1
 
-# Step 3 - make_op_enums (not yet solved)
-# TODO: implement
+# Step 3 - make_op_enums
+from enum import Enum
+
+def make_op_enums():
+    """
+    Create and return the four core enum classes required by the lazy backend 
+    to categorize computational graph operations.
+    
+    Returns:
+        tuple: (UnaryOps, BinaryOps, ReduceOps, MovementOps)
+    """
+    class UnaryOps(Enum):
+        NEG = 1
+        RELU = 2
+        LOG = 3
+        EXP = 4
+        SQRT = 5
+        SIGMOID = 6
+
+    class BinaryOps(Enum):
+        ADD = 1
+        SUB = 2
+        MUL = 3
+        DIV = 4
+        CMPLT = 5
+        MAX = 6
+
+    class ReduceOps(Enum):
+        SUM = 1
+        MAX = 2
+
+    class MovementOps(Enum):
+        RESHAPE = 1
+        EXPAND = 2
+        PERMUTE = 3
+
+    return UnaryOps, BinaryOps, ReduceOps, MovementOps
+
+# Example validation matching your framework specifications:
+if __name__ == "__main__":
+    U, B, R, M = make_op_enums()
+    print([m.name for m in U])  # Outputs: ['NEG', 'RELU', 'LOG', 'EXP', 'SQRT', 'SIGMOID']
+    print(R.SUM.name)            # Outputs: 'SUM'
 
 # Step 4 - LazyBuffer (not yet solved)
 # TODO: implement
