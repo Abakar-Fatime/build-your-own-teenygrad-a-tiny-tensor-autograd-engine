@@ -96,8 +96,30 @@ if __name__ == "__main__":
     print([m.name for m in U])  # Outputs: ['NEG', 'RELU', 'LOG', 'EXP', 'SQRT', 'SIGMOID']
     print(R.SUM.name)            # Outputs: 'SUM'
 
-# Step 4 - LazyBuffer (not yet solved)
-# TODO: implement
+# Step 4 - LazyBuffer
+import numpy as np
+
+class LazyBuffer:
+    def __init__(self, data):
+        """
+        The foundational lazy buffer that wraps a numpy array asset.
+        Converts the incoming sequence, caches shape/dtype metadata,
+        and hides the underlying array inside a private reference attribute.
+        """
+        # Convert any input data sequence or raw scalar into a standard numpy array
+        self._np = np.array(data)
+        
+        # Cache metadata fields immediately to allow quick structural introspection
+        # without invoking any raw, heavy matrix evaluations down the graph pipeline
+        self.shape = self._np.shape
+        self.dtype = self._np.dtype
+
+# Example verification matching your framework specifications:
+if __name__ == "__main__":
+    buf = LazyBuffer([[1.0, 2.0], [3.0, 4.0]])
+    print(buf.shape)          # Outputs: (2, 2)
+    print(buf.dtype)          # Outputs: dtype('float64')
+    print(buf._np.tolist())   # Outputs: [[1.0, 2.0], [3.0, 4.0]]
 
 # Step 5 - lazybuffer_const (not yet solved)
 # TODO: implement
