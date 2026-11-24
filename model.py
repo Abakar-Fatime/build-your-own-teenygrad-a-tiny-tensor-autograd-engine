@@ -31,8 +31,26 @@ if __name__ == "__main__":
     print(prod([5]))        # Outputs: 5  (A 1D tensor with 5 elements)
     print(prod(()))         # Outputs: 1  (A 0D scalar tensor has 1 element)
 
-# Step 2 - argsort (not yet solved)
-# TODO: implement
+# Step 2 - argsort
+def argsort(values):
+    """
+    Return the indices that would sort the input sequence in ascending order.
+    Maintains a stable sorting order for equivalent values.
+
+    Args:
+        values: A sequence (list or tuple) of sortable elements.
+
+    Returns:
+        A list of integers representing the sorted index permutation.
+    """
+    # Create a list of indices [0, 1, 2, ...] and sort them 
+    # using the corresponding value from the sequence as the sorting key
+    return sorted(range(len(values)), key=lambda i: values[i])
+
+# Example validations matching your framework specifications:
+if __name__ == "__main__":
+    print(argsort([3, 1, 2]))   # Outputs: [1, 2, 0] -> values[1]=1, values[2]=2, values[0]=3
+    print(argsort([10, 10, 5])) # Outputs: [2, 0, 1] -> stable sort preserves index 0 before index 1
 
 # Step 3 - make_op_enums (not yet solved)
 # TODO: implement
