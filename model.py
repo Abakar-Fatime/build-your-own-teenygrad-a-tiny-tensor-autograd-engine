@@ -311,8 +311,22 @@ def r(self: 'LazyBuffer', op: 'ReduceOps', axis=None) -> 'LazyBuffer':
 # Dynamically bind the standalone utility onto the LazyBuffer class if needed
 LazyBuffer.r = r
 
-# Step 10 - lazybuffer_reshape (not yet solved)
-# TODO: implement
+# Step 10 - lazybuffer_reshape
+def reshape(self, arg):
+    new_shape = list(arg)
+    if new_shape.count(-1) > 1:
+        raise ValueError("only one dimension can be -1")
+    if -1 in new_shape:
+        known = 1
+        for d in new_shape:
+            if d != -1:
+                known *= d
+        if known == 0 or self._np.size % known != 0:
+            raise ValueError(f"cannot reshape {self._np.shape} into {tuple(arg)}")
+        new_shape[new_shape.index(-1)] = self._np.size // known
+    if int(np.prod(new_shape)) != self._np.size:
+        raise ValueError(f"cannot reshape {self._np.shape} into {tuple(arg)}")
+    return LazyBuffer(self._np.reshape(tuple(new_shape)))
 
 # Step 11 - lazybuffer_expand (not yet solved)
 # TODO: implement
