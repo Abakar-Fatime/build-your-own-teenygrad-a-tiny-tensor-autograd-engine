@@ -121,8 +121,36 @@ if __name__ == "__main__":
     print(buf.dtype)          # Outputs: dtype('float64')
     print(buf._np.tolist())   # Outputs: [[1.0, 2.0], [3.0, 4.0]]
 
-# Step 5 - lazybuffer_const (not yet solved)
-# TODO: implement
+# Step 5 - lazybuffer_const
+import numpy as np
+
+def const(value, shape):
+    """
+    Create a new LazyBuffer of the given shape filled entirely with a constant value.
+    The underlying numpy array is explicitly enforced as a float32 data type.
+
+    Args:
+        value: The constant scalar value (float or int) to fill the buffer with.
+        shape: A tuple or list of integers representing the target dimensions.
+
+    Returns:
+        LazyBuffer: A new buffer instance containing the materialized array.
+    """
+    # Create a full array of the requested shape filled with the constant scalar,
+    # ensuring the dtype is strictly locked to float32
+    arr = np.full(shape, value, dtype=np.float32)
+    return LazyBuffer(arr)
+
+# Bind the standalone function as a static method onto the LazyBuffer class
+LazyBuffer.const = staticmethod(const)
+
+# Example verification matching your framework specifications:
+if __name__ == "__main__":
+    # Test creating a 2x3 tensor of ones
+    ones_buf = LazyBuffer.const(1.0, (2, 3))
+    print(ones_buf.shape)          # Outputs: (2, 3)
+    print(ones_buf.dtype)          # Outputs: dtype('float32')
+    print(ones_buf._np.tolist())   # Outputs: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
 
 # Step 6 - rand (not yet solved)
 # TODO: implement
