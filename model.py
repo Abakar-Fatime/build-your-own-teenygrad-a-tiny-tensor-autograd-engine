@@ -328,8 +328,17 @@ def reshape(self, arg):
         raise ValueError(f"cannot reshape {self._np.shape} into {tuple(arg)}")
     return LazyBuffer(self._np.reshape(tuple(new_shape)))
 
-# Step 11 - lazybuffer_expand (not yet solved)
-# TODO: implement
+# Step 11 - lazybuffer_expand
+def expand(self, new_shape):
+    new_shape = tuple(new_shape)
+    if len(new_shape) != self._np.ndim:
+        raise ValueError(f"expand needs same rank: {self._np.shape} -> {new_shape}")
+    for old, new in zip(self._np.shape, new_shape):
+        if old != new and old != 1:
+            raise ValueError(f"cannot expand axis of size {old} to {new}")
+    return LazyBuffer(np.broadcast_to(self._np, new_shape).copy())
+
+LazyBuffer.expand = expand   # so buf.expand((2, 3)) works too
 
 # Step 12 - lazybuffer_permute (not yet solved)
 # TODO: implement
