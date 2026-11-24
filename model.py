@@ -193,8 +193,52 @@ if __name__ == "__main__":
     # Confirm boundaries [0, 1)
     print(bool((b1._np >= 0).all() and (b1._np < 1).all()))  # Outputs: True
 
-# Step 7 - lazybuffer_unary_e (not yet solved)
-# TODO: implement
+# Step 7 - lazybuffer_unary_e
+import numpy as np
+
+def e(self, op: 'UnaryOps') -> 'LazyBuffer':
+    """
+    Apply a unary element-wise mathematical operation onto the underlying 
+    array and return a brand new LazyBuffer containing the evaluated result.
+
+    Args:
+        op: A member of the UnaryOps enum (NEG, RELU, LOG, EXP, SQRT, SIGMOID).
+
+    Returns:
+        LazyBuffer: A new buffer instance containing the transformed float32 data.
+    """
+    # Fetch the operation enum classes from your make_op_enums definition
+    # Assuming UnaryOps is globally accessible or imported into your backend file
+    
+    if op.name == 'NEG':
+        res = -self._np
+        
+    elif op.name == 'RELU':
+        # ReLU(x) = max(0, x)
+        res = np.maximum(0.0, self._np)
+        
+    elif op.name == 'LOG':
+        res = np.log(self._np)
+        
+    elif op.name == 'EXP':
+        res = np.exp(self._np)
+        
+    elif op.name == 'SQRT':
+        res = np.sqrt(self._np)
+        
+    elif op.name == 'SIGMOID':
+        # Sigmoid(x) = 1 / (1 + exp(-x))
+        res = 1.0 / (1.0 + np.exp(-self._np))
+        
+    else:
+        raise ValueError(f"Unsupported Unary operation: {op}")
+        
+    # Always return a clean, new LazyBuffer wrapping the result array
+    # cast to float32 to preserve numerical dtype stability across the backend
+    return LazyBuffer(res.astype(np.float32))
+
+# Bind the standalone function as an instance method onto the LazyBuffer class
+LazyBuffer.e = e
 
 # Step 8 - lazybuffer_binary_e (not yet solved)
 # TODO: implement
