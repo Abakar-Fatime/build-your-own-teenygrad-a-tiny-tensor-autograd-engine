@@ -340,8 +340,14 @@ def expand(self, new_shape):
 
 LazyBuffer.expand = expand   # so buf.expand((2, 3)) works too
 
-# Step 12 - lazybuffer_permute (not yet solved)
-# TODO: implement
+# Step 12 - lazybuffer_permute
+def permute(self, order):
+    order = tuple(order)
+    if sorted(order) != list(range(self._np.ndim)):
+        raise ValueError(f"invalid permutation {order} for {self._np.ndim}-D buffer")
+    return LazyBuffer(np.transpose(self._np, order).copy())
+
+LazyBuffer.permute = permute   # so a.permute((1, 0)) works too
 
 # Step 13 - Function (not yet solved)
 # TODO: implement
