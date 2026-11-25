@@ -512,8 +512,62 @@ class Sqrt(Function):
         denom = lazybuffer_binary_e(two, BinaryOps.MUL, self.ret)
         return lazybuffer_binary_e(grad_output, BinaryOps.DIV, denom)
 
-# Step 21 - Sigmoid (not yet solved)
-# TODO: implement
+# Step 21 - Sigmoid
+import numpy as np
+from enum import Enum
+
+# ---- step 3: op enums (SIGMOID and RELU added) ----
+def make_op_enums():
+    UnaryOps = Enum("UnaryOps", ["NOOP", "NEG", "EXP", "LOG", "SIN", "SQRT", "RECIPROCAL", "SIGMOID", "RELU"])
+    BinaryOps = Enum("BinaryOps", ["ADD", "SUB", "MUL", "DIV", "POW", "CMPEQ", "MAX"])
+    ReduceOps = Enum("ReduceOps", ["SUM", "MAX"])
+    MovementOps = Enum("MovementOps", ["RESHAPE", "PERMUTE", "EXPAND", "PAD", "SHRINK", "STRIDE"])
+    return UnaryOps, BinaryOps, ReduceOps, MovementOps
+
+# ---- step 4: LazyBuffer (adds const + SIGMOID/RELU in e) ----
+class LazyBuffer:
+    def __init__(self, np_array):
+        self._np = np.asarray(np_array)
+
+    @property
+    def shape(self):
+        return self._np.shape
+
+    @property
+    def dtype(self):
+        return self._np.dtype
+
+    @staticmethod
+    def const(value, shape):
+        return LazyBuffer(np.full(shape, value))
+
+    def e(self, op):
+        fns = {
+            "NOOP": lambda x: x.copy(),
+            "NEG": np.negative,
+            "EXP": np.exp,
+            "LOG": np.log,
+            "SIN": np.sin,
+            "SQRT": np.sqrt,
+            "RECIPROCAL": lambda x: 1.0 / x,
+            "SIGMOID": lambda x: 1.0 / (1.0 + np.exp(-x)),
+            "RELU": lambda x: np.maximum(x, 0),
+        }
+        return LazyBuffer(fns[op.name](self._np))
+
+# ---- this step: Sigmoid ----
+class Sigmoid(Function):
+    def forward(self, x):
+        UnaryOps, _, _, _ = make_op_enums()
+        self.ret = x.e(UnaryOps.SIGMOID)          # cache y = σ(x)
+        return self.ret
+
+    def backward(self, grad_output):
+        _, BinaryOps, _, _ = make_op_enums()
+        one = LazyBuffer.const(1.0, self.ret._np.shape)
+        one_minus_y = lazybuffer_binary_e(one, BinaryOps.SUB, self.ret)     # 1 - y
+        local = lazybuffer_binary_e(self.ret, BinaryOps.MUL, one_minus_y)   # y * (1 - y)
+        return lazybuffer_binary_e(local, BinaryOps.MUL, grad_output)       # g * y * (1 - y)
 
 # Step 22 - Add (not yet solved)
 # TODO: implement
