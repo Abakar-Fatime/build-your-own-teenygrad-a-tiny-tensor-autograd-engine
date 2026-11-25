@@ -635,8 +635,12 @@ class Div(Function):
         )
         return (grad_x, grad_y)
 
-# Step 26 - sum_function_forward (not yet solved)
-# TODO: implement
+# Step 26 - sum_function_forward
+class Sum(Function):
+    def forward(self, x, axis):
+        self.input_shape = x._np.shape
+        self.axis = axis
+        return LazyBuffer(x._np.sum(axis=axis, keepdims=True))
 
 # Step 27 - sum_function_backward (not yet solved)
 # TODO: implement
