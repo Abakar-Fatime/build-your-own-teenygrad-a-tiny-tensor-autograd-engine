@@ -642,8 +642,21 @@ class Sum(Function):
         self.axis = axis
         return LazyBuffer(x._np.sum(axis=axis, keepdims=True))
 
-# Step 27 - sum_function_backward (not yet solved)
-# TODO: implement
+# Step 27 - sum_function_backward
+def backward(self, grad_output):
+    g = np.broadcast_to(grad_output._np, self.input_shape)
+    g = np.ascontiguousarray(g)
+    return LazyBuffer(g)
+
+
+class Sum(Function):
+    def forward(self, x, axis):
+        self.input_shape = x._np.shape
+        self.axis = axis
+        return LazyBuffer(x._np.sum(axis=axis, keepdims=True))
+
+    def backward(self, grad_output):
+        return backward(self, grad_output)
 
 # Step 28 - max_function_forward (not yet solved)
 # TODO: implement
