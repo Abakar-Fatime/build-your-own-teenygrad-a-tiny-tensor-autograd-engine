@@ -416,8 +416,22 @@ class Relu(Function):
         mask = lazybuffer_binary_e(zero, BinaryOps.CMPLT, self.ret)
         return lazybuffer_binary_e(mask, BinaryOps.MUL, grad_output)
 
-# Step 18 - Log (not yet solved)
-# TODO: implement
+# Step 18 - Log
+import numpy as np
+
+
+class Log(Function):
+    def forward(self, x):
+        UnaryOps, _, _, _ = make_op_enums()
+        self.x = x
+        out = x.e(UnaryOps.LOG)
+        if hasattr(x, "_np") and hasattr(out, "_np") and out._np.dtype != x._np.dtype:
+            out._np = out._np.astype(x._np.dtype)
+        return out
+
+    def backward(self, grad_output):
+        _, BinaryOps, _, _ = make_op_enums()
+        return lazybuffer_binary_e(grad_output, BinaryOps.DIV, self.x)
 
 # Step 19 - Exp (not yet solved)
 # TODO: implement
