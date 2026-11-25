@@ -349,8 +349,22 @@ def permute(self, order):
 
 LazyBuffer.permute = permute   # so a.permute((1, 0)) works too
 
-# Step 13 - Function (not yet solved)
-# TODO: implement
+# Step 13 - Function
+class Function:
+    def __init__(self, *tensors):
+        self.needs_input_grad = [
+            tensor.requires_grad for tensor in tensors
+        ]
+
+        self.requires_grad = (
+            None if any(flag is None for flag in self.needs_input_grad)
+            else any(self.needs_input_grad)
+        )
+
+        if self.requires_grad:
+            self.parents = tuple(
+                tensor for tensor in tensors if tensor.requires_grad
+            )
 
 # Step 14 - function_forward_backward_stubs (not yet solved)
 # TODO: implement
