@@ -366,8 +366,16 @@ class Function:
                 tensor for tensor in tensors if tensor.requires_grad
             )
 
-# Step 14 - function_forward_backward_stubs (not yet solved)
-# TODO: implement
+# Step 14 - function_forward_backward_stubs
+def function_forward_backward_stubs():
+    def forward(self, *args, **kwargs):
+        raise NotImplementedError("Subclasses of Function must implement forward.")
+
+    def backward(self, *args, **kwargs):
+        raise NotImplementedError("Subclasses of Function must implement backward.")
+
+    Function.forward = forward
+    Function.backward = backward
 
 # Step 15 - apply (not yet solved)
 # TODO: implement
