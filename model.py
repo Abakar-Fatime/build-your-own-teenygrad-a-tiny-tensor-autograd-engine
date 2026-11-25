@@ -667,8 +667,27 @@ class Max(Function):
         self.ret = LazyBuffer(out)
         return self.ret
 
-# Step 29 - max_function_backward (not yet solved)
-# TODO: implement
+# Step 29 - max_function_backward
+class Max(Function):
+    def forward(self, x, axis):
+        self.x = x
+        self.axis = axis
+        out = x._np.max(axis=axis, keepdims=True)
+        self.ret = LazyBuffer(out)
+        return self.ret
+
+    def backward(self, grad_output):
+        x_shape = self.x._np.shape
+        ret_bcast = np.broadcast_to(self.ret._np, x_shape)
+        less_mask = np.less(self.x._np, ret_bcast)
+        max_mask = (~less_mask).astype(self.x._np.dtype)
+
+        counts = np.sum(max_mask, axis=self.axis, keepdims=True)
+        counts_bcast = np.broadcast_to(counts, x_shape)
+        weights = max_mask / counts_bcast
+
+        grad_bcast = np.broadcast_to(grad_output._np, x_shape)
+        return LazyBuffer(np.ascontiguousarray(weights * grad_bcast))
 
 # Step 30 - Reshape (not yet solved)
 # TODO: implement
