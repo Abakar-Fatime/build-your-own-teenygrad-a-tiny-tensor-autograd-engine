@@ -433,8 +433,71 @@ class Log(Function):
         _, BinaryOps, _, _ = make_op_enums()
         return lazybuffer_binary_e(grad_output, BinaryOps.DIV, self.x)
 
-# Step 19 - Exp (not yet solved)
-# TODO: implement
+# Step 19 - Exp
+import numpy as np
+from enum import Enum
+
+# ---- step 3: op enums ----
+def make_op_enums():
+    UnaryOps = Enum("UnaryOps", ["NOOP", "NEG", "EXP", "LOG", "SIN", "SQRT", "RECIPROCAL"])
+    BinaryOps = Enum("BinaryOps", ["ADD", "SUB", "MUL", "DIV", "POW", "CMPEQ", "MAX"])
+    ReduceOps = Enum("ReduceOps", ["SUM", "MAX"])
+    MovementOps = Enum("MovementOps", ["RESHAPE", "PERMUTE", "EXPAND", "PAD", "SHRINK", "STRIDE"])
+    return UnaryOps, BinaryOps, ReduceOps, MovementOps
+
+# ---- step 4: LazyBuffer (keeps the input dtype — no float32 cast) ----
+class LazyBuffer:
+    def __init__(self, np_array):
+        self._np = np.asarray(np_array)
+
+    @property
+    def shape(self):
+        return self._np.shape
+
+    @property
+    def dtype(self):
+        return self._np.dtype
+
+    def e(self, op):
+        fns = {
+            "NOOP": lambda x: x.copy(),
+            "NEG": np.negative,
+            "EXP": np.exp,
+            "LOG": np.log,
+            "SIN": np.sin,
+            "SQRT": np.sqrt,
+            "RECIPROCAL": lambda x: 1.0 / x,
+        }
+        return LazyBuffer(fns[op.name](self._np))
+
+# ---- step 8: binary elementwise ----
+def lazybuffer_binary_e(self, op, other):
+    fns = {
+        "ADD": np.add,
+        "SUB": np.subtract,
+        "MUL": np.multiply,
+        "DIV": np.divide,
+        "POW": np.power,
+        "CMPEQ": lambda a, b: (a == b).astype(a.dtype),
+        "MAX": np.maximum,
+    }
+    return LazyBuffer(fns[op.name](self._np, other._np))
+
+# ---- step 13: Function base ----
+class Function:
+    def __init__(self, *tensors):
+        self.parents = tensors
+
+# ---- this step: Exp ----
+class Exp(Function):
+    def forward(self, x):
+        UnaryOps, _, _, _ = make_op_enums()
+        self.ret = x.e(UnaryOps.EXP)          # cache y = e^x
+        return self.ret
+
+    def backward(self, grad_output):
+        _, BinaryOps, _, _ = make_op_enums()
+        return lazybuffer_binary_e(self.ret, BinaryOps.MUL, grad_output)   # grad * e^x
 
 # Step 20 - Sqrt (not yet solved)
 # TODO: implement
