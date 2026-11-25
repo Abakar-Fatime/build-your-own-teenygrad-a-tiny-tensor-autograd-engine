@@ -658,8 +658,14 @@ class Sum(Function):
     def backward(self, grad_output):
         return backward(self, grad_output)
 
-# Step 28 - max_function_forward (not yet solved)
-# TODO: implement
+# Step 28 - max_function_forward
+class Max(Function):
+    def forward(self, x, axis):
+        self.x = x
+        self.axis = axis
+        out = x._np.max(axis=axis, keepdims=True)
+        self.ret = LazyBuffer(out)
+        return self.ret
 
 # Step 29 - max_function_backward (not yet solved)
 # TODO: implement
